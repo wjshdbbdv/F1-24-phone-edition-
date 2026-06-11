@@ -183,26 +183,31 @@ function draw() {
         ctx.stroke();
     }
 
-    // Создаем объекты картинок
+    // 1. ДОБАВЬ ЭТОТ БЛОК СМЕЩЕНИЙ
+    const offsets = {
+        "Red Bull": { x: 0, y: 0 },
+        "Ferrari": { x: 0, y: 0 },   // Попробуй поменять 0 на -5 или 5, если криво
+        "Mercedes": { x: 0, y: 0 },
+        "McLaren": { x: 0, y: 0 }    // Попробуй поменять 0 на -5 или 5, если криво
+    };
+
     const carImages = {
         "Red Bull": new Image(),
         "Ferrari": new Image(),
         "Mercedes": new Image(),
         "McLaren": new Image()
     };
-
-    // ВАЖНО: Прописываем имена в точности как в твоем списке файлов
     carImages["Red Bull"].src = "RedBull.png.png";
     carImages["Ferrari"].src = "Ferrari.png.png";
     carImages["Mercedes"].src = "Mercedes.png.webp";
     carImages["McLaren"].src = "McLaren.png.jpeg";
 
     cars.forEach((c, i) => {
-        // Рисуем картинку болида
-        // Если картинка загрузилась, рисуем её
-        ctx.drawImage(carImages[c.name], c.x, i * 90 + 35, 60, 30);
+        // 2. ВСТАВЬ СМЕЩЕНИЕ СЮДА (x + off.x и y + off.y)
+        let off = offsets[c.name] || { x: 0, y: 0 };
+        
+        ctx.drawImage(carImages[c.name], c.x + off.x, i * 90 + 35 + off.y, 60, 30);
 
-        // Имя пилота
         ctx.fillStyle = "white";
         ctx.font = "bold 12px Arial";
         ctx.fillText(c.name, c.x, i * 90 + 30);
