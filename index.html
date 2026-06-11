@@ -175,7 +175,8 @@ function draw(){
 
 ctx.clearRect(0,0,900,450);
 
-ctx.strokeStyle="#333";
+// Рисуем полосы трассы
+ctx.strokeStyle="#222"; 
 for(let i=1;i<5;i++){
 ctx.beginPath();
 ctx.moveTo(0,i*90);
@@ -183,13 +184,26 @@ ctx.lineTo(900,i*90);
 ctx.stroke();
 }
 
+// Цвета команд
+const colors = {"Red Bull":"#3671C6", "Ferrari":"#EF1A2D", "Mercedes":"#00D2BE", "McLaren":"#FF8700"};
+
 cars.forEach((c,i)=>{
-ctx.fillStyle="white";
-ctx.fillRect(c.x,i*90+50,14,8);
-ctx.fillText(c.name,c.x,i*90+40);
+// Боковые части болида (корпус)
+ctx.fillStyle = colors[c.name] || "white";
+ctx.fillRect(c.x, i*90+35, 40, 20); 
+
+// Спойлер (черный прямоугольник сзади)
+ctx.fillStyle = "black";
+ctx.fillRect(c.x+30, i*90+35, 10, 20);
+
+// Имя пилота над машинкой
+ctx.fillStyle = "white";
+ctx.font = "bold 12px Arial";
+ctx.fillText(c.name, c.x, i*90+30);
 });
 
 }
+
 
 /* TIMING */
 function updateTiming(){
