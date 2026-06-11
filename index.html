@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>F1 Manager V22</title>
+
+<style>
+body{
+margin:0;
+background:#050505;
+color:white;
+font-family:Arial;
+display:flex;
+}
+
+#game{
+flex:3;
+}
+
+#ui{
+flex:1;
+background:#111;
+padding:10px;
+border-left:2px solid red;
+}
+
+canvas{
+display:block;
+margin:10px auto;
+background:#0d0d0d;
+border:1px solid #333;
+}
+
+button{
+width:100%;
+padding:10px;
+margin:5px 0;
+background:#000;
+color:white;
+border:1px solid red;
+cursor:pointer;
+}
+
+button:hover{background:red;}
+
+h3{margin:5px 0;}
+
+#log{
+height:200px;
+overflow:auto;
+background:#0d0d0d;
+padding:5px;
+font-size:12px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="game">
+<canvas id="c" width="900" height="450"></canvas>
+</div>
+
+<div id="ui">
+<h3>🏁 CONTROL PANEL</h3>
+
+<button onclick="startQuali()">Qualifying</button>
+<button onclick="startRace()">Race</button>
+<button onclick="toggleDRS()">DRS Toggle</button>
+<button onclick="pit()">Pit Stop</button>
+<button onclick="reset()">Reset</button>
+
+<h3>📡 Live Timing</h3>
+<div id="timing"></div>
+
+<h3>📻 Radio</h3>
+<div id="log"></div>
+</div>
+
+<script>
+
+const c=document.getElementById("c");
+const ctx=c.getContext("2d");
+
+let cars=[];
+let running=false;
+let quali=false;
+let drs=false;
+
+/* INIT */
+function init(){
+
+cars=[
+{name:"Red Bull",x:50,speed:2.6,tyre:100,ai:0.9,pitted:false},
+{name:"Ferrari",x:50,speed:2.4,tyre:100,ai:0.8,pitted:false},
+{name:"Mercedes",x:50,speed:2.3,tyre:100,ai:0.75,pitted:false},
+{name:"McLaren",x:50,speed:2.2,tyre:100,ai:0.85,pitted:false}
+];
+
+}
+
+/* LOG */
+function log(t){
+document.getElementById("log").innerHTML+="<div>"+t+"</div>";
+}
+
+/* DRS */
+function toggleDRS(){
+drs=!drs;
+log("⚡ DRS "+(drs?"ON":"OFF"));
+}
+
+/* PIT */
+function pit(){
+cars[0].tyre=100;
+cars[0].speed*=0.95;
+cars[0].x+=15;
+log("🛠 PIT STOP PLAYER");
+}
+
+/* AI */
+function ai(c){
+
+if(c.tyre<35){
+c.speed*=0.9;
+}
+
+if(Math.random()>0.98){
+c.speed+=0.2;
+}
+
+}
+
+/* OVERTAKE */
+function battle(a,b){
+
+if(Math.abs(a.x-b.x)<10){
+
+let aPerf=a.speed*(a.tyre/100);
+let bPerf=b.speed*(b.tyre/100);
+
+if(drs && a===cars[0]) aPerf+=0.4;
+
+if(aPerf>bPerf && Math.random()>a.ai){
+[a.x,b.x]=[b.x,a.x];
+log("⚔ OVERTAKE "+a.name);
+}
+
+}
+
+}
+
+/* STEP */
+function step(){
+
+cars.forEach(c=>{
+
+c.tyre-=0.3;
+ai(c);
+
+c.x += c.speed*(c.tyre/100) + Math.random()*0.4;
+
+if(Math.random()>0.999){
+c.speed*=0.5;
+log("💥 CRASH "+c.name);
+}
+
+});
+
+}
+
+/* DRAW */
+function draw(){
+
+ctx.clearRect(0,0,900,450);
+
+ctx.strokeStyle="#333";
+for(let i=1;i<5;i++){
+ctx.beginPath();
+ctx.moveTo(0,i*90);
+ctx.lineTo(900,i*90);
+ctx.stroke();
+}
+
+cars.forEach((c,i)=>{
+ctx.fillStyle="white";
+ctx.fillRect(c.x,i*90+50,14,8);
+ctx.fillText(c.name,c.x,i*90+40);
+});
+
+}
+
+/* TIMING */
+function updateTiming(){
+
+let order=[...cars].sort((a,b)=>b.x-a.x);
+
+document.getElementById("timing").innerHTML=
+order.map((c,i)=>`${i+1}. ${c.name} (${Math.floor(c.tyre)}%)`).join("<br>");
+
+}
+
+/* QUALI */
+function startQuali(){
+quali=true;
+log("⏱ QUALIFYING START");
+
+cars.forEach(c=>{
+c.x=Math.random()*200;
+});
+
+setTimeout(()=>{
+cars.sort((a,b)=>b.x-a.x);
+log("🏁 QUALI DONE");
+},3000);
+
+}
+
+/* RACE */
+function startRace(){
+running=true;
+quali=false;
+init();
+log("🏁 RACE START");
+render();
+}
+
+/* LOOP */
+function render(){
+
+if(!running) return;
+
+step();
+draw();
+updateTiming();
+
+/* battles */
+for(let i=0;i<cars.length;i++){
+for(let j=i+1;j<cars.length;j++){
+battle(cars[i],cars[j]);
+}
+}
+
+requestAnimationFrame(render);
+
+}
+
+/* RESET */
+function reset(){
+running=false;
+init();
+ctx.clearRect(0,0,900,450);
+document.getElementById("log").innerHTML="";
+document.getElementById("timing").innerHTML="";
+}
+
+init();
+
+</script>
+
+</body>
+</html>
