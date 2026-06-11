@@ -171,37 +171,42 @@ log("💥 CRASH "+c.name);
 }
 
 /* DRAW */
-function draw(){
+function draw() {
+    ctx.clearRect(0, 0, 900, 450);
 
-ctx.clearRect(0,0,900,450);
+    // Рисуем линии трассы
+    ctx.strokeStyle = "#333";
+    for (let i = 1; i < 5; i++) {
+        ctx.beginPath();
+        ctx.moveTo(0, i * 90);
+        ctx.lineTo(900, i * 90);
+        ctx.stroke();
+    }
 
-// Рисуем полосы трассы
-ctx.strokeStyle="#222"; 
-for(let i=1;i<5;i++){
-ctx.beginPath();
-ctx.moveTo(0,i*90);
-ctx.lineTo(900,i*90);
-ctx.stroke();
-}
+    // Создаем объекты картинок
+    const carImages = {
+        "Red Bull": new Image(),
+        "Ferrari": new Image(),
+        "Mercedes": new Image(),
+        "McLaren": new Image()
+    };
 
-// Цвета команд
-const colors = {"Red Bull":"#3671C6", "Ferrari":"#EF1A2D", "Mercedes":"#00D2BE", "McLaren":"#FF8700"};
+    // ВАЖНО: Прописываем имена в точности как в твоем списке файлов
+    carImages["Red Bull"].src = "RedBull.png.png";
+    carImages["Ferrari"].src = "Ferrari.png.png";
+    carImages["Mercedes"].src = "Mercedes.png.webp";
+    carImages["McLaren"].src = "McLaren.png.jpeg";
 
-cars.forEach((c,i)=>{
-// Боковые части болида (корпус)
-ctx.fillStyle = colors[c.name] || "white";
-ctx.fillRect(c.x, i*90+35, 40, 20); 
+    cars.forEach((c, i) => {
+        // Рисуем картинку болида
+        // Если картинка загрузилась, рисуем её
+        ctx.drawImage(carImages[c.name], c.x, i * 90 + 35, 60, 30);
 
-// Спойлер (черный прямоугольник сзади)
-ctx.fillStyle = "black";
-ctx.fillRect(c.x+30, i*90+35, 10, 20);
-
-// Имя пилота над машинкой
-ctx.fillStyle = "white";
-ctx.font = "bold 12px Arial";
-ctx.fillText(c.name, c.x, i*90+30);
-});
-
+        // Имя пилота
+        ctx.fillStyle = "white";
+        ctx.font = "bold 12px Arial";
+        ctx.fillText(c.name, c.x, i * 90 + 30);
+    });
 }
 
 
